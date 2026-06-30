@@ -10,15 +10,19 @@ def hello_world():
 def overlay():
     if request.method == "POST":
         base = request.files.get("base")
-        overlay = request.form.get("overlay")
+        overlayid = request.form.get("overlay")
 
-        if not base or not overlay:
+        if not base or not overlayid:
             return "400"
 
-        tobeorerlay = overlayer.getoverlay(overlay)
+        overlayinfo = overlayer.getoverlay(overlayid)
 
+        if not overlayinfo:
+            return "404"
+        
+        overlaypic = overlayer.getoverlayimage(overlayinfo)
 
-        overlayed = overlayer.overlayPicture(base, tobeorerlay)
+        overlayed = overlayer.overlayPicture(base, overlaypic)
 
         
         return "200"

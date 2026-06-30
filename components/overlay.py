@@ -1,11 +1,27 @@
+import io
 import requests as req
+from PIL import Image
 
 OVERLAYS_URL = "https://pfp.hackclub.com/api/styles"
 
 
 
 def overlayPicture(base, overlay):
-    pass
+    print(base, overlay)
+    baseimg = Image.open(base)
+    overlayimg = (
+        Image.open(io.BytesIO(overlay))
+        if isinstance(overlay, bytes)
+        else Image.open(overlay)
+    )
+
+    overlayimg.thumbnail(baseimg.size, Image.LANCZOS)
+    x = (baseimg.width - overlayimg.width) // 2
+    y = (baseimg.height - overlayimg.height) // 2
+
+    baseimg.paste(overlayimg, (x, y), mask=overlayimg)
+    baseimg.show()
+    input()
 
 
 def getoverlays():
@@ -24,8 +40,16 @@ def getoverlay(id):
         if opt["id"] == id
     )
 
-    print(option)
+    return option
+    
+
+def downloadoverlay(overlayurl):
+    overlay = req.get(overlayurl)
+    return overlay.content
+
 
 
 def getoverlayimage(overlay):
-    return overlay["overlayPath"]
+    url = overlay["overlayPath"]
+
+    return downloadoverlay(url) 
