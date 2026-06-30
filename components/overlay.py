@@ -1,6 +1,7 @@
+import requests as req # pyright: ignore[reportMissingModuleSource, reportMissingImports]
+from PIL import Image # pyright: ignore[reportMissingImports]
+from flask import Response # pyright: ignore[reportMissingModuleSource]
 import io
-import requests as req
-from PIL import Image
 
 OVERLAYS_URL = "https://pfp.hackclub.com/api/styles"
 
@@ -20,8 +21,12 @@ def overlayPicture(base, overlay):
     y = (baseimg.height - overlayimg.height) // 2
 
     baseimg.paste(overlayimg, (x, y), mask=overlayimg)
-    baseimg.show()
-    input()
+
+    buffer = io.BytesIO()
+    baseimg.save(buffer, format="PNG")
+    buffer.seek(0)
+
+    return Response(buffer, mimetype="image/png")
 
 
 def getoverlays():

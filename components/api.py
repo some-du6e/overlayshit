@@ -25,4 +25,4 @@ def overlay():
         overlayed = overlayer.overlayPicture(base, overlaypic)
 
         
-        return "200"
+        return overlayed
