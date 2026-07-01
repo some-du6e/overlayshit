@@ -58,3 +58,14 @@ def getoverlayimage(overlay):
     url = overlay["overlayPath"]
 
     return downloadoverlay(url) 
+
+def getoverlayamount():
+    overlays = getoverlays()
+    amount = 0 
+
+    for i in overlays["styles"]:
+
+        amount += len(i["options"])
+    
+    return amount
+

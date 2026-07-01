@@ -5,7 +5,8 @@ app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), ".
 
 @app.route("/")
 def home():
-    return render_template("home.html", overlay_amt=67)
+    amount = overlayer.getoverlayamount()
+    return render_template("home.html", overlay_amt=amount)
 
 @app.route("/overlay", methods=["POST"])
 def overlay():
