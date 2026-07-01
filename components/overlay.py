@@ -39,10 +39,11 @@ def getoverlay(id):
     overlays = getoverlays()
 
     option = next(
-        opt
+        (opt
         for s in overlays["styles"]
         for opt in s["options"]
-        if opt["id"] == id
+        if opt["id"] == id),
+        None
     )
 
     return option
@@ -69,3 +70,18 @@ def getoverlayamount():
     
     return amount
 
+
+
+def getalloverlays(asIds=False):
+    overlays = getoverlays()
+    all = []
+
+    for i in overlays["styles"]:
+
+        for x in i["options"]:
+            if asIds:
+                all.append(x["id"])
+            else:
+                all.append(x)
+
+    return all
