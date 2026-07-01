@@ -1,10 +1,11 @@
-from flask import Flask, request # type: ignore
+from flask import Flask, request, render_template# type: ignore
 import components.overlay as overlayer
-app = Flask(__name__)
+import os
+app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), "..", "templates"))
 
 @app.route("/")
-def hello_world():
-    return "<p>bye, World!</p>"
+def home():
+    return render_template("home.html")
 
 @app.route("/overlay", methods=["POST"])
 def overlay():
