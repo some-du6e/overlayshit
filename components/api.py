@@ -1,6 +1,7 @@
 from flask import Flask, request, render_template# type: ignore
 import components.overlay as overlayer
 import os
+from PIL import Image # type: ignore
 app = Flask(__name__, template_folder=os.path.join(os.path.dirname(__file__), "..", "templates"))
 
 @app.route("/")
@@ -8,26 +9,28 @@ def home():
     amount = overlayer.getoverlayamount()
     return render_template("home.html", overlay_amt=amount)
 
+@app.route("/overlaying")
+def overlaying():
+    return render_template("overlaying.html")
+
 @app.route("/overlay", methods=["POST"])
-def overlay(id, base):
-    if request.method == "POST" or id:
-        base = request.files.get("base") or base
-        overlayid = request.form.get("overlay") or id
+def overlay():
+    base = request.files.get("base")
+    overlayid = request.form.get("overlay")
 
-        if not base or not overlayid:
-            return "400"
+    if not base or not overlayid:
+        return "400", 400
 
-        overlayinfo = overlayer.getoverlay(overlayid)
+    overlayinfo = overlayer.getoverlay(overlayid)
 
-        if not overlayinfo:
-            return "404"
-        
-        overlaypic = overlayer.getoverlayimage(overlayinfo)
+    if not overlayinfo:
+        return "404", 404
+    
+    overlaypic = overlayer.getoverlayimage(overlayinfo)
 
-        overlayed = overlayer.overlayPicture(base, overlaypic)
+    overlayed = overlayer.overlayPicture(base, overlaypic)
 
-        
-        return overlayed
+    return overlayed
 
 
 
@@ -40,22 +43,25 @@ def overlay_multi():
         overlayids = request.form.getlist("overlays")
 
         if not base or not overlayids:
-            return "400"
+            return "400", 400
 
         print("overlays ids", overlayids)
         
         if overlayids[0] == "all":
-            overlayids = overlayer.getalloverlays(asIds=True)
+            overlayinfos = overlayer.getalloverlays()
+        else:
+            overlayinfos = [
+                overlayinfo
+                for overlayid in overlayids
+                if (overlayinfo := overlayer.getoverlay(overlayid))
+            ]
 
-        overlayed = None
-        for overlayid in overlayids:
-            temp = overlay(overlayid, base)
-            if temp == "404":
-                print(f"overlay with id {overlayid} not found mate")
-            else:
-                overlayed = temp
+        overlayed = Image.open(base).convert("RGBA")
+        for overlayinfo in overlayinfos:
+            overlaypic = overlayer.getoverlayimage(overlayinfo)
+            overlayed = overlayer.applyOverlay(overlayed, overlaypic)
 
         if overlayed is None:
-            return "404"
+            return "404", 404
 
-        return overlayed
+        return overlayer.imageResponse(overlayed)
